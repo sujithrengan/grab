@@ -1,6 +1,7 @@
 
 base_s_track_search='https://api.spotify.com/v1/search?q=track:PH_TRACK%20artist:PH_ARTIST&type=track'
 base_s_track_search_interactive='https://api.spotify.com/v1/search?q=PH_QUERY&type=track'
+base_s_album_info='https://api.spotify.com/v1/albums/PH_ALBUM'
 base_m_lyric_search='https://www.musixmatch.com/search/PH_QUERY'
 base_m_lyric_info='https://www.musixmatch.comPH_TRACK'
 

@@ -29,13 +29,13 @@ class grabtask:
 		req_headers = {'User-Agent': 'grab'}
 		
 		try:
-			response=requests.get(req_url,headers=req_headers,timeout=10)
+			response=requests.get(req_url,headers=req_headers,timeout=5)
 			soup=BeautifulSoup(response.text,'html.parser')
 			best_track=soup.find_all('a',attrs={'class': 'title'})[0].get('href')
 			
 			req_url=utils.base_m_lyric_info.replace('PH_TRACK',best_track)
 
-			response=requests.get(req_url,headers=req_headers,timeout=10)
+			response=requests.get(req_url,headers=req_headers,timeout=5)
 			soup=BeautifulSoup(response.text,'html.parser')
 			lyr=''
 			#lyr_tags=soup.find_all('p',attrs={'class':'mxm-lyrics__content'})
@@ -99,13 +99,14 @@ class grabtask:
 		ydl=youtube_dl.YoutubeDL(ydl_opts)
 
 		try:
-
+			dl=False
 			for i in range(1,utils.range_threshold+1):
-				ydl_simulate.download(['gvsearch'+str(i)+':'+query+' '*(i-1)])
+				ydl_simulate.download(['gvsearch'+str(i)+':youtube:'+query+' '*(i-1)])
 				with open('.simulate.info.json') as data_file:
 					data = json.load(data_file)
 					#print(data['fulltitle'])
 					#print(data['uploader'])
+					#print(data['webpage_url'])
 					if abs(self.songtrack.duration_ms-data['duration']*1000)<utils.duration_threshold:
 						ydl.download([data['webpage_url']])
 						data_file.close()
@@ -114,18 +115,23 @@ class grabtask:
 							os.remove('./.simulate.info.json')
 						except OSError as e:
 							print(e.strerror)
-						self.search_lyric_mx(0)
-						self.fix_track()
 						
-						break
+						if os.path.isfile(self.songtrack.fname+'.m4a'):
+							dl=True
+							break
+			
+			if dl:
+				self.search_lyric_mx(0)
+				self.fix_track()
+			else:
+				if attempt==0:
+					print(utils.highlight.WARN+'Couldn\'t find track. Searching alternatives...'+utils.highlight.ENDC)
+					self.grab_track_yt(attempt+1,query+' audio')
+				else:
+					print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
 		
 		except Exception as e:
-			
-			if attempt==0:
-				print(utils.highlight.WARN+'Couldn\'t find track. Searching alternatives...'+utils.highlight.ENDC)
-				self.grab_track_yt(0,query+' audio')
-			else:
-				print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
+			print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)	
 		
 
 	def extract_track(self,tracks,index):
@@ -136,7 +142,22 @@ class grabtask:
 		self.songtrack.album=tracks['tracks']['items'][index]['album']['name']
 		self.songtrack.album_artist=tracks['tracks']['items'][index]['album']['artists'][0]['name']
 		self.songtrack.album_art=tracks['tracks']['items'][index]['album']['images'][0]['url']
+		self.songtrack.total_tracks, \
+		self.songtrack.year		= self.extract_album_info_spotify(\
+								tracks['tracks']['items'][index]['album']['id'])
+	
 
+	def extract_album_info_spotify(self,arg_album):
+
+		req_url=utils.base_s_album_info.replace('PH_ALBUM',arg_album)
+		req_url=req_url.replace(' ','%20')
+
+		try:
+			response=response=requests.get(req_url,timeout=5)
+			album=response.json()
+			return (album['tracks']['total'] , album['release_date'].split('-')[0])
+		except:
+			pass
 
 	def search_track_spotify_interactive(self,attempt,arg_track):
 		
@@ -148,7 +169,7 @@ class grabtask:
 		req_url=req_url.replace(' ','%20')
 		
 		try:
-			response=requests.get(req_url,timeout=10)
+			response=requests.get(req_url,timeout=5)
 			tracks=response.json()
 			for index in range(0,tracks['tracks']['total']):
 				sys.stdout.write('\r')
@@ -160,6 +181,7 @@ class grabtask:
 
 				if(str(inp)=='y'):
 					self.extract_track(tracks,index)
+					self.get_album_spotify()
 					self.prog_print('Track found. Setting up download...')
 					query=self.songtrack.name+' '+self.songtrack.album_artist
 					self.grab_track_yt(0,query)
@@ -197,7 +219,7 @@ class grabtask:
 		req_url=req_url.replace(' ','%20')
 		#print(req_url)
 		try:
-			response=requests.get(req_url,timeout=10)
+			response=requests.get(req_url,timeout=5)
 			self.extract_track(response.json(),0)
 			self.prog_print('Track found. Setting up download...')
 

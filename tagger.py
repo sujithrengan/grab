@@ -55,7 +55,7 @@ class tagtask:
 		trackfile['\xa9day']=self.songtrack.year
 		trackfile['\xa9gen']=self.songtrack.genre
 		trackfile['\xa9lyr']=self.songtrack.lyric
-		#trackfile['trkn']=self.songtrack.track_number
+		trackfile['trkn']=[[self.songtrack.track_number,self.songtrack.total_tracks]]
 		trackfile.save()
 		self.prog_print('Fixed. Adding Art...')
 
