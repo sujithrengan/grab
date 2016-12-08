@@ -8,10 +8,12 @@ class track:
 		self.artist=''
 		self.album_artist=''
 		self.year=''
+		self.copyright=''
 		self.album_art=''
 		self.lyric=''
 		self.genre=''
 		self.track_number=1
+		self.total_tracks=1
 		self.url=''
 		self.duration_ms=0
 		self.fname=''
@@ -55,6 +57,7 @@ class tagtask:
 		trackfile['\xa9day']=self.songtrack.year
 		trackfile['\xa9gen']=self.songtrack.genre
 		trackfile['\xa9lyr']=self.songtrack.lyric
+		trackfile['cprt']=self.songtrack.copyright
 		trackfile['trkn']=[[self.songtrack.track_number,self.songtrack.total_tracks]]
 		trackfile.save()
 		self.prog_print('Fixed. Adding Art...')

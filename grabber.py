@@ -143,7 +143,8 @@ class grabtask:
 		self.songtrack.album_artist=tracks['tracks']['items'][index]['album']['artists'][0]['name']
 		self.songtrack.album_art=tracks['tracks']['items'][index]['album']['images'][0]['url']
 		self.songtrack.total_tracks, \
-		self.songtrack.year		= self.extract_album_info_spotify(\
+		self.songtrack.year,	\
+		self.songtrack.copyright= self.extract_album_info_spotify(\
 								tracks['tracks']['items'][index]['album']['id'])
 	
 
@@ -155,7 +156,14 @@ class grabtask:
 		try:
 			response=response=requests.get(req_url,timeout=5)
 			album=response.json()
-			return (album['tracks']['total'] , album['release_date'].split('-')[0])
+			label=''
+			try:
+				label=album['label']
+			except:
+				pass
+
+			return (album['tracks']['total'] , album['release_date'].split('-')[0] ,\
+					label)
 		except:
 			pass
 
@@ -181,7 +189,6 @@ class grabtask:
 
 				if(str(inp)=='y'):
 					self.extract_track(tracks,index)
-					self.get_album_spotify()
 					self.prog_print('Track found. Setting up download...')
 					query=self.songtrack.name+' '+self.songtrack.album_artist
 					self.grab_track_yt(0,query)
