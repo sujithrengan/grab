@@ -8,7 +8,7 @@ Requires Python 2
 Clone the repo or download zip.
 `cd` into the cloned folder and:
 
-`pip install -r require`
+`pip install -r requires`
 
 ##Usage
 
