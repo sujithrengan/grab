@@ -58,7 +58,7 @@ class grabtask:
 	def fix_track(self):
 		tagger.tagtask(self.songtrack).tag_now()
 
-	def grab_track_yt(self,query):
+	def grab_track_yt(self,attempt,query):
 
 		def yt_progress(progress):
 			#print(progress)
@@ -109,17 +109,24 @@ class grabtask:
 					if abs(self.songtrack.duration_ms-data['duration']*1000)<utils.duration_threshold:
 						ydl.download([data['webpage_url']])
 						data_file.close()
-						break
-			
-			try:		
-				os.remove('./.simulate.info.json')
-			except OSError as e:
-				print(e.strerror)
 						
-			self.search_lyric_mx(0)
-			self.fix_track()
+						try:		
+							os.remove('./.simulate.info.json')
+						except OSError as e:
+							print(e.strerror)
+						self.search_lyric_mx(0)
+						self.fix_track()
+						
+						break
+		
 		except Exception as e:
-			print(utils.highlight.FAIL+'Download Failed. '+utils.highlight.ENDC)
+			
+			if attempt==0:
+				print(utils.highlight.WARN+'Couldn\'t find track. Searching alternatives...'+utils.highlight.ENDC)
+				self.grab_track_yt(0,query+' audio')
+			else:
+				print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
+		
 
 	def extract_track(self,tracks,index):
 		self.songtrack.name=tracks['tracks']['items'][index]['name']
@@ -153,9 +160,9 @@ class grabtask:
 
 				if(str(inp)=='y'):
 					self.extract_track(tracks,index)
-					self.prog_print('Track found. Downloading...')
+					self.prog_print('Track found. Setting up download...')
 					query=self.songtrack.name+' '+self.songtrack.album_artist
-					self.grab_track_yt(query)
+					self.grab_track_yt(0,query)
 					break
 				else:
 					pass
@@ -192,11 +199,11 @@ class grabtask:
 		try:
 			response=requests.get(req_url,timeout=10)
 			self.extract_track(response.json(),0)
-			self.prog_print('Track found. Downloading...')
+			self.prog_print('Track found. Setting up download...')
 
 			#self.songtrack.print_info()
 			query=self.songtrack.name+' '+self.songtrack.album_artist
-			self.grab_track_yt(query)
+			self.grab_track_yt(0,query)
 			#self.search_track_lastfm()
 
 		except requests.exceptions.Timeout:
@@ -263,7 +270,7 @@ def grab_now(args):
 
 	elif args.track!=None:
 		#print('To download: ' + self.args.artist)
-		print('Searching Track...')
+		print('Identifying Track...')
 		grabtask().search_track_spotify(0,args.track,args.artist)
 	
 	else:

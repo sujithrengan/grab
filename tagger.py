@@ -34,11 +34,11 @@ class tagtask:
 
 	def prog_print(self,text,status=0):
 		if status==0:
-			print('['+self.songtrack.name+']'+text)
+			print('['+self.songtrack.name+'] '+text)
 		elif status==1:
-			print(utils.highlight.OKGREEN+'['+self.songtrack.name+']'+text+utils.highlight.ENDC)
+			print(utils.highlight.OKGREEN+'['+self.songtrack.name+'] '+text+utils.highlight.ENDC)
 		elif status==-1:
-			print(utils.highlight.FAIL+'['+self.songtrack.name+']'+text+utils.highlight.ENDC)
+			print(utils.highlight.FAIL+'['+self.songtrack.name+'] '+text+utils.highlight.ENDC)
 
 
 
