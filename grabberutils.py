@@ -1,11 +1,4 @@
 
-api_key='f8abe4f577f9bbc882861a2674ecf3ba'
-
-base_l_track_search='http://ws.audioscrobbler.com/2.0/?method=track.search&track=PH_TRACK&api_key=PH_API_KEY&format=json'
-base_l_album_search='http://ws.audioscrobbler.com/2.0/?method=album.search&album=PH_ALBUM&api_key=PH_API_KEY&format=json'
-base_l_track_info='http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=PH_API_KEY&artist=PH_ARTIST&track=PH_TRACK&format=json'
-base_l_album_info='http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=PH_API_KEY&artist=PH_ARTIST&album=PH_ALBUM&format=json'
-
 base_s_track_search='https://api.spotify.com/v1/search?q=track:PH_TRACK%20artist:PH_ARTIST&type=track'
 base_s_track_search_interactive='https://api.spotify.com/v1/search?q=PH_QUERY&type=track'
 base_m_lyric_search='https://www.musixmatch.com/search/PH_QUERY'
