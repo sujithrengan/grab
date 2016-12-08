@@ -124,7 +124,7 @@ class grabtask:
 				self.search_lyric_mx(0)
 				self.fix_track()
 			else:
-				if attempt==0:
+				if attempt==0 and utils.quick_mode==False:
 					print(utils.highlight.WARN+'Couldn\'t find track. Searching alternatives...'+utils.highlight.ENDC)
 					self.grab_track_yt(attempt+1,query+' audio')
 				else:
@@ -250,6 +250,8 @@ def grab_now(args):
 
 	if args.error!=None:
 		utils.duration_threshold=args.error*1000
+	if args.quick==True:
+		utils.quick_mode=True
 
 	if args.file!=None:
 		

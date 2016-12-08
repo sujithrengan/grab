@@ -8,6 +8,7 @@ base_m_lyric_info='https://www.musixmatch.comPH_TRACK'
 backoff_threshold=3
 duration_threshold=3000
 range_threshold=3
+quick_mode=False
 file_mode_template ='##Modify this file as needed.\n##Lines starting with \'##\' are ignored.' + \
 					 '\n##Do not modify lines starting with \'@@\'.\n\n@@begin_tracks\n##List'+ \
 					 ' tracks below as <trackname>//<artist> or just <trackname>\n##Examples:'+ \
