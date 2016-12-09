@@ -119,7 +119,7 @@ class grabtask:
 						if os.path.isfile(self.songtrack.fname+'.m4a'):
 							dl=True
 							break
-			
+
 			if dl:
 				self.search_lyric_mx(0)
 				self.fix_track()
@@ -131,6 +131,14 @@ class grabtask:
 					print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
 		
 		except Exception as e:
+
+			try:
+				os.remove('./'+self.songtrack.fname+'.m4a.part')
+				os.remove('./'+self.songtrack.fname+'.m4a.part-Frag0.part')
+				os.remove('./.simulate.info.json')
+			except Exception as e:
+				pass
+
 			print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)	
 		
 
@@ -164,6 +172,7 @@ class grabtask:
 
 			return (album['tracks']['total'] , album['release_date'].split('-')[0] ,\
 					label)
+
 		except:
 			pass
 
@@ -291,12 +300,14 @@ def grab_now(args):
 			grabtask().search_track_spotify_interactive(0,args.track)
 		
 		elif args.album!=None:
+
 			pass
 		
 		else:	
 			sys.exit('Album or track missing')
 		
 	elif args.album!=None:
+		
 		pass
 
 	elif args.track!=None:

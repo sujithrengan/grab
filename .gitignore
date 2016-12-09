@@ -90,4 +90,5 @@ ENV/
 
 #Testing m4a files
 *.m4a
-
+#Testing list file
+list.txt
