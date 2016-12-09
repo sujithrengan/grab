@@ -391,7 +391,7 @@ def grab_now(args):
 					if(file_input[i][0:2]!='##' and file_input[i].strip()!=''):
 						query_line=file_input[i].split('//')
 						if len(query_line)==1:
-							if utils.source=0:
+							if utils.source==0:
 								grabtask().search_track_spotify_interactive(0,query_line[0])
 							else:
 								grabtask().search_track_itunes_interactive(0,query_line[0])
