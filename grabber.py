@@ -216,7 +216,7 @@ class grabtask:
 			if tracks['tracks']['total']==0:
 				print(utils.highlight.FAIL+'Track not found. Try altering your search.'+utils.highlight.ENDC)
 
-			
+
 			for index in range(0,tracks['tracks']['total']):
 				sys.stdout.write('\r')
 				sys.stdout.write(tracks['tracks']['items'][index]['name']+'(' + \
@@ -391,9 +391,16 @@ def grab_now(args):
 					if(file_input[i][0:2]!='##' and file_input[i].strip()!=''):
 						query_line=file_input[i].split('//')
 						if len(query_line)==1:
-							grabtask().search_track_spotify_interactive(0,query_line[0])
+							if utils.source=0:
+								grabtask().search_track_spotify_interactive(0,query_line[0])
+							else:
+								grabtask().search_track_itunes_interactive(0,query_line[0])
+
 						else:
-							grabtask().search_track_spotify(0,query_line[0],query_line[1])
+							if utils.source==0:
+								grabtask().search_track_spotify(0,query_line[0],query_line[1])
+							else:
+								grabtask().search_track_itunes(0,query_line[0],query_line[1])
 
 
 
