@@ -58,6 +58,14 @@ class grabtask:
 	def fix_track(self):
 		tagger.tagtask(self.songtrack).tag_now()
 
+	def clean_up_dir(self):
+		try:
+			os.remove('./'+self.songtrack.fname+'.m4a.part')
+			os.remove('./'+self.songtrack.fname+'.m4a.part-Frag0.part')
+			os.remove('./.simulate.info.json')
+		except Exception as e:
+			pass
+
 	def grab_track_yt(self,attempt,query):
 
 		def yt_progress(progress):
@@ -130,19 +138,16 @@ class grabtask:
 				else:
 					print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
 		
-		except Exception as e:
-
-			try:
-				os.remove('./'+self.songtrack.fname+'.m4a.part')
-				os.remove('./'+self.songtrack.fname+'.m4a.part-Frag0.part')
-				os.remove('./.simulate.info.json')
-			except Exception as e:
-				pass
-
+		except Exception as e:			
+			self.clean_up_dir()
 			print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)	
+
+		except KeyboardInterrupt:
+			self.clean_up_dir()
+			sys.exit('\nExiting...')
 		
 
-	def extract_track(self,tracks,index):
+	def extract_track_spotify(self,tracks,index):
 		self.songtrack.name=tracks['tracks']['items'][index]['name']
 		self.songtrack.artist=tracks['tracks']['items'][index]['artists'][0]['name']
 		self.songtrack.track_number=tracks['tracks']['items'][index]['track_number']
@@ -154,6 +159,25 @@ class grabtask:
 		self.songtrack.year,	\
 		self.songtrack.copyright= self.extract_album_info_spotify(\
 								tracks['tracks']['items'][index]['album']['id'])
+
+
+	def extract_track_itunes(self,tracks,index):
+		self.songtrack.name=tracks['results'][index]['trackName']
+		self.songtrack.artist=tracks['results'][index]['artistName']
+		self.songtrack.track_number=tracks['results'][index]['trackNumber']
+		self.songtrack.duration_ms=tracks['results'][index]['trackTimeMillis']
+		self.songtrack.album=tracks['results'][index]['collectionName']
+		try:
+			self.songtrack.album_artist=tracks['results'][index]['collectionArtistName']
+		except:
+			self.songtrack.album_artist=self.songtrack.artist
+
+		self.songtrack.album_art=tracks['results'][index]['artworkUrl100']\
+								.replace('100x100bb','600x600bb')
+		self.songtrack.total_tracks=tracks['results'][index]['trackCount']
+		self.songtrack.year=tracks['results'][index]['releaseDate']
+		self.songtrack.copyright= '_iTunes_'
+		self.songtrack.genre=tracks['results'][index]['primaryGenreName']
 	
 
 	def extract_album_info_spotify(self,arg_album):
@@ -197,7 +221,7 @@ class grabtask:
 				inp=raw_input('	Download this? (y/n)')
 
 				if(str(inp)=='y'):
-					self.extract_track(tracks,index)
+					self.extract_track_spotify(tracks,index)
 					self.prog_print('Track found. Setting up download...')
 					query=self.songtrack.name+' '+self.songtrack.album_artist
 					self.grab_track_yt(0,query)
@@ -236,7 +260,7 @@ class grabtask:
 		#print(req_url)
 		try:
 			response=requests.get(req_url,timeout=5)
-			self.extract_track(response.json(),0)
+			self.extract_track_spotify(response.json(),0)
 			self.prog_print('Track found. Setting up download...')
 
 			#self.songtrack.print_info()
@@ -256,6 +280,44 @@ class grabtask:
 		except KeyboardInterrupt:
 			sys.exit('\nExiting...')
 
+
+	def search_track_itunes(self,attempt,arg_track,arg_artist):
+		'''
+		Searches the track specified withe the artist on itunes.
+		If result empty, forwards to a plain search without the artist
+
+		'''
+		if(attempt>utils.backoff_threshold):
+			print('Giving up.')
+			return
+
+		
+		req_url=utils.base_i_track_search.replace('PH_TRACK',arg_track+'+'+arg_artist)
+		req_url=req_url.replace(' ','+')
+		#print(req_url)
+		try:
+			response=requests.get(req_url,timeout=5)
+			self.extract_track_itunes(response.json(),0)
+			self.prog_print('Track found. Setting up download...')
+
+			#self.songtrack.print_info()
+			query=self.songtrack.name+' '+self.songtrack.album_artist
+			self.grab_track_yt(0,query)
+			#self.search_track_lastfm()
+
+		except requests.exceptions.Timeout:
+			print('Connection timeout. Retrying in 5 seconds...')
+			sleep(5)
+			self.search_track_itunes(attempt+1)
+		except requests.exceptions.ConnectionError:
+			print('Network Error. Please check connection and try again.')
+		except IndexError,KeyError:
+			print(utils.highlight.WARN+'Track not found. Bringing up sugestions...'+utils.highlight.ENDC)
+			self.search_track_itunes_interactive(0,arg_track)
+		except KeyboardInterrupt:
+			sys.exit('\nExiting...')
+
+
 	
 def grab_now(args):
 	'''
@@ -268,6 +330,8 @@ def grab_now(args):
 		utils.duration_threshold=args.error*1000
 	if args.quick==True:
 		utils.quick_mode=True
+	if args.itunes==True:
+		utils.source=1;
 
 	if args.file!=None:
 		
@@ -313,7 +377,12 @@ def grab_now(args):
 	elif args.track!=None:
 		#print('To download: ' + self.args.artist)
 		print('Identifying Track...')
-		grabtask().search_track_spotify(0,args.track,args.artist)
+		if utils.source==0:
+			grabtask().search_track_spotify(0,args.track,args.artist)
+
+		else:
+			grabtask().search_track_itunes(0,args.track,args.artist)
+
 	
 	else:
 		sys.exit('Album or track missing')

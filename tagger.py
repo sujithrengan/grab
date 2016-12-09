@@ -22,10 +22,11 @@ class track:
 		print("name: "+self.name)
 		print("album: "+self.album)
 		print("artist: "+self.artist)
+		print("album_artist: "+self.album_artist)
 		print("year: "+self.year)
 		print("album_art: "+self.album_art)
 		print("track_number: "+str(self.track_number))
-		print("url: "+self.url)
+		print("genre: "+str(self.genre)) 
 		print("duration_ms: "+str(self.duration_ms))
 
 
