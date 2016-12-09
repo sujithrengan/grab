@@ -25,6 +25,8 @@ Clone the repo or download zip.
   	-t TRACK, --track TRACK		Track to download
   	-f FILE, --file FILE  		Download tracks/abums listed in the file. Use the same to
                         		generate a template of the same name and edit as needed.
+	-i, --itunes         		Search from iTunes
+	-s, --spotify         		Search from Spotify (Default)
 
 ##Examples:
 

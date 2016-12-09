@@ -212,6 +212,11 @@ class grabtask:
 		try:
 			response=requests.get(req_url,timeout=5)
 			tracks=response.json()
+
+			if tracks['tracks']['total']==0:
+				print(utils.highlight.FAIL+'Track not found. Try altering your search.'+utils.highlight.ENDC)
+
+			
 			for index in range(0,tracks['tracks']['total']):
 				sys.stdout.write('\r')
 				sys.stdout.write(tracks['tracks']['items'][index]['name']+'(' + \
@@ -240,6 +245,50 @@ class grabtask:
 		except KeyboardInterrupt:
 			sys.exit('\nExiting...')
 
+
+	def search_track_itunes_interactive(self,attempt,arg_track):
+		
+		if(attempt>utils.backoff_threshold):
+			print('Giving up.')
+			return
+
+		req_url=utils.base_i_track_search.replace('PH_TRACK',arg_track)
+		req_url=req_url.replace(' ','+')
+		
+		try:
+			response=requests.get(req_url,timeout=5)
+			tracks=response.json()
+
+			if tracks['resultCount']==0:
+				print(utils.highlight.FAIL+'Track not found. Try altering your search.'+utils.highlight.ENDC)
+
+			for index in range(0,tracks['resultCount']):
+				sys.stdout.write('\r')
+				sys.stdout.write(tracks['results'][index]['trackName']+'(' + \
+								tracks['results'][index]['collectionName'] + \
+								') by ' + tracks['results'][index]['artistName'])
+				sys.stdout.flush()
+				inp=raw_input('	Download this? (y/n)')
+
+				if(str(inp)=='y'):
+					self.extract_track_itunes(tracks,index)
+					self.prog_print('Track found. Setting up download...')
+					query=self.songtrack.name+' '+self.songtrack.album_artist
+					self.grab_track_yt(0,query)
+					break
+				else:
+					pass
+
+		except requests.exceptions.Timeout:
+			print('Connection timeout. Retrying in 5 seconds...')
+			sleep(5)
+			self.search_track_itunes_ineractive(attempt+1)
+		except requests.exceptions.ConnectionError:
+			print('Network Error. Please check connection and try again.')
+		except IndexError,KeyError:
+			print(utils.highlight.FAIL+'Track not found. Try altering your search.'+utils.highlight.ENDC)
+		except KeyboardInterrupt:
+			sys.exit('\nExiting...')
 
 
 
@@ -359,12 +408,17 @@ def grab_now(args):
 	elif args.artist==None:
 		
 		if args.track!=None:
-			args.artist=''
-			print(utils.highlight.WARN+'Artist not specified. Bringing up sugestions...'+utils.highlight.ENDC)
-			grabtask().search_track_spotify_interactive(0,args.track)
-		
-		elif args.album!=None:
 
+			if utils.source==0:
+				args.artist=''
+				print(utils.highlight.WARN+'Artist not specified. Bringing up sugestions...'+utils.highlight.ENDC)
+				grabtask().search_track_spotify_interactive(0,args.track)
+			else:
+				args.artist=''
+				print(utils.highlight.WARN+'Artist not specified. Bringing up sugestions...'+utils.highlight.ENDC)
+				grabtask().search_track_itunes_interactive(0,args.track)
+			
+		elif args.album!=None:
 			pass
 		
 		else:	
