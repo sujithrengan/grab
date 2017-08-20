@@ -18,8 +18,8 @@ def script():
 	group_mode.add_argument('-f','--file',help="Download tracks/abums listed in the file.Use the same"+\
 						" a template of the same name.")
 
-	group_source.add_argument('-i','--itunes',help="Search from iTunes",action="store_true")
-	group_source.add_argument('-s','--spotify',help="Search from Spotify (Default)",\
+	group_source.add_argument('-i','--itunes',help="Search from iTunes (Default)",action="store_true")
+	group_source.add_argument('-s','--spotify',help="Search from Spotify",\
 							action="store_true")
 
 

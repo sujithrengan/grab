@@ -13,7 +13,10 @@ backoff_threshold=3
 duration_threshold=3000
 range_threshold=3
 quick_mode=False
-source=0
+
+# iTunes   1
+# Spotify  0
+source = 1
 
 file_mode_template ='##Modify this file as needed.\n##Lines starting with \'##\' are ignored.' + \
 					 '\n##Do not modify lines starting with \'@@\'.\n\n@@begin_tracks\n##List'+ \

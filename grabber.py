@@ -61,11 +61,25 @@ class grabtask:
 	def clean_up_dir(self):
 		try:
 			os.remove('./'+self.songtrack.fname+'.m4a.part')
-			os.remove('./'+self.songtrack.fname+'.m4a.part-Frag0.part')
+		except Exception as e:
+			pass
+		try:
+			os.remove('./'+self.songtrack.fname+'.m4a.part-Frag0')
+		except Exception as e:
+			pass
+		try:
 			os.remove('./.simulate.info.json')
 		except Exception as e:
 			pass
+		try:
+			os.remove('./'+self.songtrack.fname+'.m4a.ytdl')
+		except Exception as e:
+			pass
 
+	'''
+	Given a query, the function recursively searches and downloads the audio 
+	matched by the closest duration
+	'''
 	def grab_track_yt(self,attempt,query):
 
 		def yt_progress(progress):
@@ -86,7 +100,12 @@ class grabtask:
 
 				count=int(50*down/total)
 				sys.stdout.write('\r')
-				sys.stdout.write("%-10s[%-50s] %d%%" % (str(int(progress['speed']/1000))+'KB/s','#'*count, count*2))
+				speed='0'
+				try:
+					speed = str(int(progress['speed']/1000))
+				except:
+					pass
+				sys.stdout.write("%-10s[%-50s] %d%%" % (speed+'KB/s','#'*count, count*2))
 				sys.stdout.flush()
 
 			elif(progress['status']=='finished'):
@@ -115,6 +134,7 @@ class grabtask:
 					#print(data['fulltitle'])
 					#print(data['uploader'])
 					#print(data['webpage_url'])
+					#print(str(data['duration']*1000) +' || ' + str(self.songtrack.duration_ms))
 					if abs(self.songtrack.duration_ms-data['duration']*1000)<utils.duration_threshold:
 						ydl.download([data['webpage_url']])
 						data_file.close()
@@ -136,10 +156,15 @@ class grabtask:
 					print(utils.highlight.WARN+'Couldn\'t find track. Searching alternatives...'+utils.highlight.ENDC)
 					self.grab_track_yt(attempt+1,query+' audio')
 				else:
+					self.clean_up_dir()
 					print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)
 		
 		except Exception as e:			
 			self.clean_up_dir()
+			print('Fail error : '+str(e))
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			f__name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+			print(exc_type, f__name, exc_tb.tb_lineno)
 			print(utils.highlight.FAIL+'Download failed.'+utils.highlight.ENDC)	
 
 		except KeyboardInterrupt:
@@ -379,8 +404,8 @@ def grab_now(args):
 		utils.duration_threshold=args.error*1000
 	if args.quick==True:
 		utils.quick_mode=True
-	if args.itunes==True:
-		utils.source=1;
+	if args.spotify==True:
+		utils.source=0;
 
 	if args.file!=None:
 		
@@ -391,7 +416,7 @@ def grab_now(args):
 					if(file_input[i][0:2]!='##' and file_input[i].strip()!=''):
 						query_line=file_input[i].split('//')
 						if len(query_line)==1:
-							if utils.source=0:
+							if utils.source==0:
 								grabtask().search_track_spotify_interactive(0,query_line[0])
 							else:
 								grabtask().search_track_itunes_interactive(0,query_line[0])
