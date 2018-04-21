@@ -1,6 +1,7 @@
 from mutagen.mp4 import MP4,MP4Cover
 import grabberutils as utils
 import requests
+import subprocess
 class track:
 	def __init__(self):
 		self.name=''
@@ -74,11 +75,15 @@ class tagtask:
 			trackfile['covr']=[MP4Cover(art.content,MP4Cover.FORMAT_JPEG)]
 			trackfile.save()
 			self.prog_print('Art Added. All Done.',1)
+			player= subprocess.Popen(['vlc',self.songtrack.fname+'.m4a'],shell=False,
+    							stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+			#player= subprocess.Popen(["vlc","/home/madmachine/Projects/grab/FRIENDS - Anne-Marie.m4a"]) 
 		except requests.exceptions.Timeout:
 			print('TimedOut. Retrying in 5 seconds...')
 			sleep(5)
 			self.tag_image(attempt+1)
 		except KeyboardInterrupt:
 			sys.exit('\nExiting...')
-		except:
+		except Exception as e:
 			print('Skipping AlbumArt...All Done.')
+			print('Fail: ' +str(e))
